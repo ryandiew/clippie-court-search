@@ -193,14 +193,13 @@ const CHIPS = [
   {t:"Lily Hamblin highlights"},
 ];
 const PLACEHOLDERS = [
-  "the three that put HRS ahead late",
-  "every bucket that gave HRS the lead",
-  "clutch threes in close games",
-  "every make by number 11",
-  "when Team Cali took the lead",
-  "every Nick Taubes three",
-  "all HRS makes vs Emerald",
-  "Lily Hamblin in close games",
+  "HRS go-ahead threes",
+  "clutch threes, tie game",
+  "every make by #11",
+  "Nick Taubes vs Emerald",
+  "when Team Cali led",
+  "Lily Hamblin's best",
+  "Team Cali steals",
 ];
 let curQ=null, RESULTS=[], _phi=0;
 const TAG = {"3PT Make":"3PT","2PT Make":"2PT","Free Throw":"FT","Steal":"STEAL","Block":"BLOCK","Assist":"ASSIST","Assist (2PT)":"ASSIST","Rebound":"REB","Off. Rebound":"REB"};
@@ -231,7 +230,7 @@ renderChips(false);
 // rotate the placeholder to show off natural-language moment search (pauses while typing)
 qEl.placeholder=PLACEHOLDERS[0];
 setInterval(()=>{
-  if(qEl.value||document.activeElement===qEl||hero.className.includes('results'))return;
+  if(qEl.value||hero.className.includes('results'))return;  // rotate while empty, even if focused
   _phi=(_phi+1)%PLACEHOLDERS.length;
   qEl.style.transition='opacity .25s'; qEl.style.opacity='0';
   setTimeout(()=>{qEl.placeholder=PLACEHOLDERS[_phi];qEl.style.opacity='1';},250);
@@ -362,7 +361,6 @@ function closeFeed(){
   document.querySelectorAll('#feed video').forEach(v=>{try{v.pause();}catch(_){}v.removeAttribute('src');v.load();});
   document.getElementById('feed').innerHTML='';
 }
-qEl.focus();
 </script>
 </body>
 </html>
