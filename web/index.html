@@ -26,10 +26,8 @@
   .hero.results .brand{justify-content:flex-start}
   .hero.results .brand .ic{width:34px;height:34px}
   .hero.results .brand .nm{font-size:27px}
-  .headline{font-family:Fredoka;font-weight:600;font-size:clamp(25px,4.4vw,40px);letter-spacing:-.02em;line-height:1.08;margin-top:20px}
-  .subhead{color:var(--soft);font-size:15.5px;margin-top:12px;max-width:560px;line-height:1.5}
-  .subhead b{color:#fff;font-weight:600}
-  .hero.results .headline,.hero.results .subhead{display:none}
+  .headline{font-family:Fredoka;font-weight:500;font-size:clamp(21px,2.7vw,27px);letter-spacing:-.01em;line-height:1.15;margin-top:22px;color:#f2f4f8}
+  .hero.results .headline{display:none}
 
   .searchbar{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
     border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 8px 30px rgba(0,0,0,.4);transition:.15s}
@@ -80,8 +78,8 @@
 
   .empty{grid-column:1/-1;color:var(--soft);text-align:center;padding:50px 20px;font-size:14px}
   .loading{color:var(--soft);font-size:13px;padding:30px 4px}
-  footer{margin-top:auto;padding-top:40px;color:rgba(255,255,255,.4);font-size:12px;line-height:1.6}
-  footer b{color:var(--soft)}
+  footer{margin-top:auto;padding-top:40px;color:rgba(255,255,255,.28);font-size:11.5px;text-align:center;font-weight:500}
+  footer b{color:rgba(255,255,255,.5);font-weight:600}
 
   /* ---- TikTok-style clip feed (matches highlights.clippie.app) ---- */
   .ov{position:fixed;inset:0;z-index:100;background:#000;display:none}
@@ -128,7 +126,6 @@
       <div class="nm">Clippie</div>
     </div>
     <div class="headline">Search basketball like you remember it.</div>
-    <div class="subhead">Describe the player, team, score, or moment -- Clippie finds the exact clip across <b>1,675 real game highlights</b>.</div>
     <div class="searchbar">
       <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="q" placeholder="the three that put HRS ahead late" autocomplete="off"/>
@@ -147,7 +144,7 @@
     </div>
   </div>
 
-  <footer>Every clip is real game film auto-detected and cut by <b>Clippie</b>'s computer-vision pipeline, then indexed in <b>Qdrant</b>. Your search is parsed into Qdrant filters — team, jersey number, play type, and computed game-state (go-ahead, close game) — with semantic vector ranking for free-text like player names. Sports World Cup Hackathon 2026.</footer>
+  <footer>1,675 real clips · computer vision + <b>Qdrant</b> · Sports World Cup Hackathon 2026</footer>
 </div>
 <script>
 const CHIPS = [
