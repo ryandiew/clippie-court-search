@@ -84,7 +84,20 @@
   /* ---- TikTok-style clip feed (matches highlights.clippie.app) ---- */
   .ov{position:fixed;inset:0;z-index:100;background:#000;display:none}
   .ov.on{display:block}
-  .ov .stage{position:relative;width:100%;max-width:520px;height:100dvh;margin:0 auto;background:#000}
+  .ov .stage{position:relative;width:100%;height:100dvh;background:#000}
+  /* controls + caption stay a readable width and centered even on a wide desktop video */
+  .ovctrls,.ovbody{max-width:860px;margin-left:auto;margin-right:auto}
+  /* blurred backdrop fills the void behind portrait (9:16) clips — Reels/Shorts style */
+  .ovbgimg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;filter:blur(38px) brightness(.4);transform:scale(1.18)}
+  .ovstagewrap{z-index:1}
+  /* desktop: video column full-height + centered on the blurred fill, not a phone-in-a-box */
+  @media(min-width:820px){
+    .ov .stage{max-width:none}
+    .ovstage video{object-fit:contain}
+    .ovctrls,.ovbody{width:calc(100dvh * 9 / 16);left:50%;right:auto;transform:translateX(-50%)}
+    .swipehint{bottom:150px}
+    .ovx,.ovtag{top:calc(20px + env(safe-area-inset-top))}
+  }
   .feed{position:absolute;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
   .feed::-webkit-scrollbar{display:none}
   .slide{position:relative;width:100%;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;background:#000}
@@ -116,6 +129,28 @@
   .ovsc{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.14);border-radius:7px;padding:5px 10px;flex:none;font-variant-numeric:tabular-nums}
   .swipehint{position:absolute;left:0;right:0;bottom:168px;text-align:center;color:rgba(255,255,255,.65);font-size:12.5px;font-weight:500;z-index:4;pointer-events:none;animation:fadehint 3.5s ease forwards}
   @keyframes fadehint{0%,55%{opacity:1}100%{opacity:0}}
+
+  /* ---- mobile ---- */
+  @media (max-width:560px){
+    .wrap{padding:16px 14px 60px}
+    .brand{gap:9px}
+    .brand .ic{width:34px;height:34px}
+    .brand .nm{font-size:29px}
+    .headline{font-size:19px;margin-top:15px;padding:0 6px}
+    .hero.home{padding-bottom:22vh}
+    .hero.home .searchbar{width:100%;margin-top:22px}
+    .searchbar{padding:5px 5px 5px 15px;gap:8px}
+    .searchbar input{font-size:15px}
+    .searchbar .go{height:42px;padding:0 15px;font-size:13.5px;gap:6px}
+    /* chips: one tidy swipeable row instead of wrapping to 3 lines */
+    .chips{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin-top:16px;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:none}
+    .results{margin-top:18px}
+    .clipgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+    footer{font-size:11px;padding-top:28px}
+    .ovctrls{bottom:96px}
+  }
 </style>
 </head>
 <body>
@@ -243,6 +278,7 @@ function slideHTML(c,i){
   const tag=TAG[c.event]||(c.event||'').toUpperCase().slice(0,6);
   const tags=`${tag?`<span class="t">${tag}</span>`:''}${c.go_ahead?'<span class="t ga">⚡ GO-AHEAD</span>':''}`;
   return `<div class="slide" data-i="${i}">
+    ${c.thumb?`<div class="ovbgimg" style="background-image:url('${c.thumb}')"></div>`:''}
     <div class="ovtag">${tags}</div>
     <div class="ovstagewrap" data-close="1">
       <div class="ovstage" data-act="toggle">
