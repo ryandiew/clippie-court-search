@@ -18,8 +18,8 @@
 
   /* hero (search is the product) */
   .hero{display:flex;flex-direction:column;align-items:center;text-align:center}
-  /* home: pin to dead-center of the viewport (footer sits behind at the bottom) */
-  .hero.home{position:fixed;inset:0;justify-content:center;padding:0 20px}
+  /* home: centered but nudged slightly above the midline, Google-style */
+  .hero.home{position:fixed;inset:0;justify-content:center;padding:0 20px 14vh}
   .hero.results{position:static;flex:none;padding-top:8px;align-items:stretch}
   .brand{display:flex;align-items:center;gap:12px;justify-content:center;cursor:pointer}
   .brand .ic{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.5)}
@@ -138,7 +138,7 @@
     .brand .ic{width:34px;height:34px}
     .brand .nm{font-size:29px}
     .headline{font-size:19px;margin-top:15px;padding:0 6px}
-    .hero.home{padding:0 16px}
+    .hero.home{padding:0 16px 14vh}
     .hero.home .searchbar{width:100%;margin-top:22px}
     .searchbar{padding:5px 5px 5px 15px;gap:8px}
     .searchbar input{font-size:15px}
