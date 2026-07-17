@@ -148,6 +148,64 @@ def search(q, limit=24):
     return [{**p["payload"], "sim": None} for p in res["points"]]
 
 
+# ---- Browse: teams -> roster -> clips (how a coach or parent actually navigates) ----
+BROWSE = {"teams": [], "rosters": {}}  # built once at startup from the clean Qdrant set
+
+
+def build_browse():
+    from collections import defaultdict
+    pts = []
+    nxt = None
+    while True:
+        body = {"limit": 512, "with_payload": True, "with_vector": False}
+        if nxt:
+            body["offset"] = nxt
+        r = http_json(f"{QDRANT}/collections/{COLLECTION}/points/scroll", body)["result"]
+        pts += r["points"]
+        nxt = r.get("next_page_offset")
+        if not nxt:
+            break
+    team_ct = defaultdict(int)
+    rosters = defaultdict(lambda: defaultdict(lambda: {"name": "", "number": "", "count": 0}))
+    for p in pts:
+        d = p["payload"]
+        team = (d.get("team") or "").strip()
+        if not team:
+            continue
+        team_ct[team] += 1
+        name = (d.get("player") or "").strip()
+        num = str(d.get("number") or "").strip()
+        if not (name or num):
+            continue
+        key = name or ("#" + num)
+        e = rosters[team][key]
+        e["name"] = name or e["name"]
+        e["number"] = num or e["number"]
+        e["count"] += 1
+    teams = sorted(({"team": t, "count": c} for t, c in team_ct.items()), key=lambda x: -x["count"])
+    rout = {}
+    for t, players in rosters.items():
+        rout[t] = sorted(players.values(), key=lambda x: -x["count"])
+    return {"teams": teams, "rosters": rout}
+
+
+def clips_for(team=None, number=None, name=None, event=None, limit=60):
+    must = []
+    if team:
+        must.append({"key": "team", "match": {"value": team}})
+    if number:
+        must.append({"key": "number", "match": {"value": str(number)}})
+    if name:
+        must.append({"key": "player", "match": {"value": name}})
+    if event:
+        must.append({"key": "event", "match": {"value": event}})
+    body = {"limit": limit, "with_payload": True, "with_vector": False}
+    if must:
+        body["filter"] = {"must": must}
+    res = http_json(f"{QDRANT}/collections/{COLLECTION}/points/scroll", body)["result"]
+    return [p["payload"] for p in res["points"]]
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -161,8 +219,25 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(u.query)
+        if u.path == "/api/teams":
+            return self._send(200, json.dumps({"teams": BROWSE["teams"]}))
+        if u.path == "/api/roster":
+            team = qs.get("team", [""])[0]
+            return self._send(200, json.dumps({"team": team, "players": BROWSE["rosters"].get(team, [])}))
+        if u.path == "/api/clips":
+            try:
+                clips = clips_for(
+                    team=qs.get("team", [None])[0],
+                    number=qs.get("number", [None])[0],
+                    name=qs.get("name", [None])[0],
+                    event=qs.get("event", [None])[0],
+                )
+                return self._send(200, json.dumps({"results": clips}))
+            except Exception as e:
+                return self._send(500, json.dumps({"error": str(e)}))
         if u.path == "/api/search":
-            q = urllib.parse.parse_qs(u.query).get("q", [""])[0].strip()
+            q = qs.get("q", [""])[0].strip()
             if not q:
                 return self._send(400, json.dumps({"error": "missing q"}))
             try:
@@ -185,6 +260,7 @@ class H(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8787"))
     TEAMS = load_teams()
-    print(f"loaded {len(TEAMS)} team match-keys")
+    BROWSE = build_browse()
+    print(f"loaded {len(TEAMS)} team match-keys, {len(BROWSE['teams'])} teams")
     print(f"court-search on :{port}")
     ThreadingHTTPServer(("0.0.0.0", port), H).serve_forever()
