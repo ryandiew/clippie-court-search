@@ -53,7 +53,8 @@
   .chip{font-size:13.5px;font-weight:500;padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.06);
     color:var(--soft);white-space:nowrap;border:1px solid var(--line);cursor:pointer;transition:.12s}
   .chip:hover{color:#fff;border-color:var(--cyan);background:rgba(91,224,255,.08)}
-  .chip.hot{color:var(--amber);border-color:rgba(254,215,105,.3)}
+  .chip.on{background:linear-gradient(135deg,var(--amber),var(--amber2));color:#14100a;border-color:transparent;font-weight:600;padding-right:34px;position:relative}
+  .chip.on::after{content:"×";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:15px;font-weight:700;opacity:.75}
 
   .results{margin-top:26px}
   .status{color:var(--soft);font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin:6px 2px 14px;min-height:15px}
@@ -105,37 +106,41 @@
 </div>
 <script>
 const CHIPS = [
-  {t:"clutch buckets", hot:true},
-  {t:"HRS Summer go-ahead", hot:true},
+  {t:"clutch buckets"},
+  {t:"HRS Summer go-ahead"},
   {t:"Nick Taubes threes"},
   {t:"Team Cali 16u steals"},
   {t:"Lily Hamblin"},
 ];
+let curQ=null;
 const TAG = {"3PT Make":"3PT","2PT Make":"2PT","Free Throw":"FT","Steal":"STEAL","Block":"BLOCK","Assist":"ASSIST","Assist (2PT)":"ASSIST","Rebound":"REB","Off. Rebound":"REB"};
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
 const hero=document.getElementById('hero'), results=document.getElementById('results'), chipsEl=document.getElementById('chips'), qEl=document.getElementById('q');
 
-CHIPS.forEach(c=>{
-  const b=el(`<div class="chip${c.hot?' hot':''}">${c.t}</div>`);
-  b.onclick=()=>{qEl.value=c.t;run();};
-  chipsEl.appendChild(b);
-});
 const bar=document.querySelector('.searchbar');
 qEl.addEventListener('keydown',e=>{if(e.key==='Enter')run();if(e.key==='Escape')goHome();});
 qEl.addEventListener('input',()=>bar.classList.toggle('has',!!qEl.value.trim()));
 
 function goHome(){
+  curQ=null;
   hero.className='hero home'; results.innerHTML=''; qEl.value=''; bar.classList.remove('has');
   renderChips(false); qEl.focus();
 }
 function renderChips(compact){
   chipsEl.innerHTML='';
   if(compact) chipsEl.appendChild(el(`<div class="chiplabel">Try</div>`));
-  CHIPS.forEach(c=>{const b=el(`<div class="chip${c.hot?' hot':''}">${c.t}</div>`);b.onclick=()=>{qEl.value=c.t;run();};chipsEl.appendChild(b);});
+  CHIPS.forEach(c=>{
+    const on = c.t===curQ;
+    const b=el(`<div class="chip${on?' on':''}">${c.t}</div>`);
+    b.onclick=()=> on ? goHome() : (qEl.value=c.t, run());  // click active chip = deselect
+    chipsEl.appendChild(b);
+  });
 }
+renderChips(false);
 
 async function run(){
   const q=qEl.value.trim(); if(!q) return;
+  curQ=q;
   bar.classList.add('has');
   hero.className='hero results';
   renderChips(true);
