@@ -36,17 +36,116 @@ def http_json(url, payload=None, headers=None):
         return json.loads(r.read())
 
 
-def search(q, limit=12):
-    vec = http_json(
+import re
+
+# Play-type language -> canonical event value stored in the payload.
+PLAY_WORDS = [
+    (("three", "threes", "3pt", "3-pt", "3 point", "triple", "from deep", "downtown"), "3PT Make"),
+    (("free throw", "free throws", "foul shot", "from the line", "and one"), "Free Throw"),
+    (("steal", "steals", "takeaway", "takeaways"), "Steal"),
+    (("assist", "assists", "dime", "dimes", "dish"), "Assist"),
+    (("block", "blocks", "swat", "rejection"), "Block"),
+    (("rebound", "rebounds", "board", "boards"), "Rebound"),
+    (("layup", "layups", "at the rim", "finish", "finishes", "two pointer", "2pt"), "2PT Make"),
+]
+
+# Loaded once at startup: every team name in the collection, for query matching.
+TEAMS = []          # [(match_key_lower, canonical_team)]
+
+
+def age_strip(t):
+    """'Bay City 17u' -> 'bay city' so a coach typing the short name still hits."""
+    return re.sub(r"\b\d{1,2}u\b|\b\d{2}['’]?\b", "", t, flags=re.I).strip().lower()
+
+
+def load_teams():
+    seen = {}
+    nxt = None
+    while True:
+        body = {"limit": 512, "with_payload": ["team"], "with_vector": False}
+        if nxt:
+            body["offset"] = nxt
+        r = http_json(f"{QDRANT}/collections/{COLLECTION}/points/scroll", body)["result"]
+        for p in r["points"]:
+            t = (p["payload"].get("team") or "").strip()
+            if t:
+                seen[t.lower()] = t
+                seen[age_strip(t)] = t
+        nxt = r.get("next_page_offset")
+        if not nxt:
+            break
+    # longest keys first so "team cali 16u" wins over "team cali"
+    return sorted(([k, v] for k, v in seen.items() if k), key=lambda kv: -len(kv[0]))
+
+
+def parse(q):
+    """Pull structured filters (team / jersey # / play type) out of a plain query.
+    Returns (qdrant_filter, residual_text_for_semantic_rank)."""
+    ql = " " + q.lower() + " "
+    must = []
+    used = []
+
+    for key, team in TEAMS:
+        if key and (" " + key + " ") in ql:
+            must.append({"key": "team", "match": {"value": team}})
+            used.append(key)
+            ql = ql.replace(" " + key + " ", " ")
+            break
+
+    m = re.search(r"#\s*(\d{1,3})|\b(?:number|no|jersey)\s+(\d{1,3})\b", ql)
+    if m:
+        num = m.group(1) or m.group(2)
+        must.append({"key": "number", "match": {"value": num}})
+        ql = ql[: m.start()] + " " + ql[m.end():]
+
+    for words, ev in PLAY_WORDS:
+        if any((" " + w + " ") in ql for w in words):
+            must.append({"key": "event", "match": {"value": ev}})
+            for w in words:
+                ql = ql.replace(" " + w + " ", " ")
+            break
+
+    residual = re.sub(r"\s+", " ", ql).strip(" -")
+    # strip filler that carries no meaning once filters are pulled
+    residual = re.sub(r"\b(show me|all|every|clips? of|highlights?|by|for|the|a|an|of)\b", " ", residual)
+    residual = re.sub(r"\s+", " ", residual).strip()
+    return ({"must": must} if must else None), residual
+
+
+def embed(text):
+    return http_json(
         "https://api.openai.com/v1/embeddings",
-        {"model": EMBED_MODEL, "input": [q]},
+        {"model": EMBED_MODEL, "input": [text]},
         {"Authorization": f"Bearer {KEY}"},
     )["data"][0]["embedding"]
-    res = http_json(
-        f"{QDRANT}/collections/{COLLECTION}/points/search",
-        {"vector": vec, "limit": limit, "with_payload": True},
-    )
-    return [{**p["payload"], "sim": round(p["score"], 3)} for p in res["result"]]
+
+
+# Highlights only -- never surface misses or bare attempts.
+NOT_HIGHLIGHT = [{"key": "event", "match": {"value": v}} for v in ("2PT Miss", "3PT Miss", "Shot Attempt")]
+
+
+def with_filter(filt):
+    f = dict(filt) if filt else {}
+    f["must_not"] = NOT_HIGHLIGHT
+    return f
+
+
+def search(q, limit=24):
+    filt, residual = parse(q)
+    if residual:  # semantic component -> filtered vector search
+        body = {"vector": embed(residual), "limit": limit, "with_payload": True, "filter": with_filter(filt)}
+        res = http_json(f"{QDRANT}/collections/{COLLECTION}/points/search", body)["result"]
+        # Trim the long tail: keep the natural cluster near the top match so a name
+        # search returns THAT player, not a padded list of loosely-related clips.
+        if res:
+            top = res[0]["score"]
+            cut = max(0.32, top * 0.80)
+            res = [p for p in res if p["score"] >= cut]
+        return [{**p["payload"], "sim": round(p["score"], 3)} for p in res]
+    # pure structured lookup (e.g. "NBBA threes") -> filtered scroll, no vector needed
+    body = {"limit": limit, "with_payload": True, "with_vector": False, "filter": with_filter(filt)}
+    res = http_json(f"{QDRANT}/collections/{COLLECTION}/points/scroll", body)["result"]
+    return [{**p["payload"], "sim": None} for p in res["points"]]
 
 
 class H(BaseHTTPRequestHandler):
@@ -85,5 +184,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8787"))
+    TEAMS = load_teams()
+    print(f"loaded {len(TEAMS)} team match-keys")
     print(f"court-search on :{port}")
     ThreadingHTTPServer(("0.0.0.0", port), H).serve_forever()

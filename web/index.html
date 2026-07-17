@@ -78,11 +78,11 @@
       Court Search
     </div>
   </div>
-  <div class="sub">Ask for a play in plain English. <span class="qd">Qdrant</span> vector search over <b>1,750+ real game highlights</b> -- every result is an actual clip our CV pipeline cut from live youth basketball.</div>
+  <div class="sub">Find any player's highlights. Coaches reviewing film, parents pulling their kid's clips, media cutting reels -- search <b>1,750+ real game highlights</b> by <b>name</b>, <b>jersey number</b>, <b>team</b>, or <b>play type</b>. Every result is a real clip our CV pipeline cut from live game footage, retrieved with <span class="qd">Qdrant</span>.</div>
 
   <div class="search">
     <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    <input id="q" placeholder='clutch three pointer in a close game' autofocus/>
+    <input id="q" placeholder='e.g. "Lily Hamblin" or "every three by NBBA"' autofocus/>
     <button onclick="go()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       Search
@@ -92,15 +92,15 @@
   <div class="status" id="status"></div>
   <div class="grid" id="grid"></div>
 
-  <footer>Built on the <b>Clippie</b> pipeline: a custom YOLO make-detection model cuts every clip from real game film, OpenAI embeds each play's context, and <b>Qdrant</b> serves the semantic search. Sports World Cup Hackathon 2026.</footer>
+  <footer>Built on the <b>Clippie</b> pipeline: a custom YOLO model detects makes and auto-cuts every clip from real game film. <b>Qdrant</b> powers retrieval -- structured payload filters (team, jersey number, play type) combined with semantic vector ranking, so a coach, parent, or reporter finds exactly the clips they want. Sports World Cup Hackathon 2026.</footer>
 </div>
 <script>
 const EXAMPLES = [
-  "clutch three pointer in a close game",
-  "steal that led to a bucket",
-  "free throws late in the game",
-  "buzzer beater to tie it up",
-  "big play in a blowout",
+  "Lily Hamblin",
+  "every three by NBBA",
+  "HRS Summer steals",
+  "Team Cali 16u highlights",
+  "West Albany #15",
 ];
 const chips = document.getElementById('chips');
 EXAMPLES.forEach(t => {
@@ -126,8 +126,9 @@ async function go() {
     const r = await fetch('/api/search?q=' + encodeURIComponent(q));
     const d = await r.json();
     if (d.error) { st.textContent = 'Error: ' + d.error; return; }
-    if (!d.results.length) { st.textContent=''; grid.innerHTML = '<div class="empty">No clips found. Try another play.</div>'; return; }
-    st.textContent = d.results.length + ' clips · ranked by Qdrant similarity';
+    if (!d.results.length) { st.textContent=''; grid.innerHTML = '<div class="empty">No clips found. Try a name, jersey number, team, or play type.</div>'; return; }
+    const ranked = d.results.some(r => r.sim != null);
+    st.textContent = d.results.length + (ranked ? ' clips · ranked by Qdrant similarity' : ' clips · exact match');
     for (const c of d.results) {
       const a = document.createElement('a');
       a.className = 'clip'; a.href = c.video; a.target = '_blank'; a.rel = 'noopener';
@@ -147,7 +148,7 @@ async function go() {
       a.querySelector('.who').textContent = who;
       a.querySelector('.desc').textContent = c.matchup || c.text || '';
       a.querySelector('.scorepill').textContent = c.score ? c.score : (c.team || '');
-      a.querySelector('.sim').textContent = c.sim;
+      a.querySelector('.sim').textContent = c.sim == null ? '' : c.sim;
       grid.appendChild(a);
     }
   } catch (e) { st.textContent = 'Error: ' + e; }
