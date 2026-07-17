@@ -49,6 +49,13 @@ PLAY_WORDS = [
     (("layup", "layups", "at the rim", "finish", "finishes", "two pointer", "2pt"), "2PT Make"),
 ]
 
+# Game-state language -> computed payload tag (go_ahead / close / blowout).
+MOMENT_WORDS = [
+    (("go ahead", "go-ahead", "goahead", "go aheads", "lead change", "lead changing", "took the lead", "take the lead", "lead taking", "go ahead bucket"), "go_ahead"),
+    (("clutch", "close game", "close games", "tie game", "tight game", "down to the wire", "nail biter", "buzzer"), "close"),
+    (("blowout", "blow out", "garbage time"), "blowout"),
+]
+
 # Loaded once at startup: every team name in the collection, for query matching.
 TEAMS = []          # [(match_key_lower, canonical_team)]
 
@@ -59,7 +66,7 @@ def age_strip(t):
 
 
 def load_teams():
-    seen = {}
+    names = set()
     nxt = None
     while True:
         body = {"limit": 512, "with_payload": ["team"], "with_vector": False}
@@ -69,11 +76,19 @@ def load_teams():
         for p in r["points"]:
             t = (p["payload"].get("team") or "").strip()
             if t:
-                seen[t.lower()] = t
-                seen[age_strip(t)] = t
+                names.add(t)
         nxt = r.get("next_page_offset")
         if not nxt:
             break
+    # Exact team names win; add age-stripped aliases only where they don't collide
+    # (so "NBBA" -> NBBA and "NBBA 15u" -> NBBA 15u, not one clobbering the other).
+    seen = {}
+    for t in names:
+        seen[t.lower()] = t
+    for t in names:
+        a = age_strip(t)
+        if a and a not in seen:
+            seen[a] = t
     # longest keys first so "team cali 16u" wins over "team cali"
     return sorted(([k, v] for k, v in seen.items() if k), key=lambda kv: -len(kv[0]))
 
@@ -101,6 +116,14 @@ def parse(q):
     for words, ev in PLAY_WORDS:
         if any((" " + w + " ") in ql for w in words):
             must.append({"key": "event", "match": {"value": ev}})
+            for w in words:
+                ql = ql.replace(" " + w + " ", " ")
+            break
+
+    # Game-state moments computed from the score sequence and stored as payload tags.
+    for words, tag in MOMENT_WORDS:
+        if any((" " + w + " ") in ql for w in words):
+            must.append({"key": tag, "match": {"value": True}})
             for w in words:
                 ql = ql.replace(" " + w + " ", " ")
             break
@@ -139,7 +162,9 @@ def search(q, limit=24):
         # search returns THAT player, not a padded list of loosely-related clips.
         if res:
             top = res[0]["score"]
-            cut = max(0.32, top * 0.80)
+            # Relative cluster cut only -- no absolute floor (which zeroed out weak
+            # generic residuals like "buckets"); keeps a name search tight but never empty.
+            cut = top * 0.80
             res = [p for p in res if p["score"] >= cut]
         return [{**p["payload"], "sim": round(p["score"], 3)} for p in res]
     # pure structured lookup (e.g. "NBBA threes") -> filtered scroll, no vector needed
@@ -189,7 +214,7 @@ def build_browse():
     return {"teams": teams, "rosters": rout}
 
 
-def clips_for(team=None, number=None, name=None, event=None, limit=60):
+def clips_for(team=None, number=None, name=None, event=None, moment=None, limit=60):
     must = []
     if team:
         must.append({"key": "team", "match": {"value": team}})
@@ -199,6 +224,8 @@ def clips_for(team=None, number=None, name=None, event=None, limit=60):
         must.append({"key": "player", "match": {"value": name}})
     if event:
         must.append({"key": "event", "match": {"value": event}})
+    if moment in ("go_ahead", "close", "blowout"):
+        must.append({"key": moment, "match": {"value": True}})
     body = {"limit": limit, "with_payload": True, "with_vector": False}
     if must:
         body["filter"] = {"must": must}
@@ -232,6 +259,7 @@ class H(BaseHTTPRequestHandler):
                     number=qs.get("number", [None])[0],
                     name=qs.get("name", [None])[0],
                     event=qs.get("event", [None])[0],
+                    moment=qs.get("moment", [None])[0],
                 )
                 return self._send(200, json.dumps({"results": clips}))
             except Exception as e:

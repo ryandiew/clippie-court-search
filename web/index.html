@@ -14,63 +14,46 @@
   html,body{font-family:Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;color:#fff}
   body{background:#080809;min-height:100dvh}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 90px}
+  .wrap{max-width:1100px;margin:0 auto;padding:22px 20px 90px;min-height:100dvh;display:flex;flex-direction:column}
 
-  /* header */
-  .top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-  .top .ic{width:36px;height:36px;border-radius:10px;flex:none;object-fit:cover;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.5)}
-  .top .nm{font-family:Pacifico;font-size:25px;line-height:1;color:#fafafa}
-  .top .spacer{flex:1}
-  .top .search{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:9px 13px;width:min(340px,44vw)}
-  .top .search svg{width:16px;height:16px;color:var(--soft);flex:none}
-  .top .search input{all:unset;flex:1;color:#fff;font-size:14px;min-width:0}
-  .top .search input::placeholder{color:rgba(255,255,255,.45)}
+  /* hero (search is the product) */
+  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;transition:padding .35s ease}
+  .hero.home{padding-top:min(20vh,150px)}
+  .hero.results{padding-top:8px;align-items:stretch}
+  .brand{display:flex;align-items:center;gap:12px;justify-content:center;cursor:pointer}
+  .brand .ic{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+  .brand .nm{font-family:Pacifico;font-size:40px;line-height:1;color:#fafafa}
+  .hero.results .brand{justify-content:flex-start}
+  .hero.results .brand .ic{width:34px;height:34px}
+  .hero.results .brand .nm{font-size:27px}
+  .tag{color:var(--soft);font-size:15px;margin-top:14px}
+  .tag b{color:#fff;font-weight:600}
+  .hero.results .tag{display:none}
 
-  .crumbs{display:flex;align-items:center;gap:8px;color:var(--soft);font-size:13px;margin-bottom:16px;flex-wrap:wrap}
-  .crumbs a{cursor:pointer;color:var(--soft);font-weight:500}
-  .crumbs a:hover{color:#fff}
-  .crumbs .sep{opacity:.4}
-  .crumbs .cur{color:#fff;font-weight:600}
+  .searchbar{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 8px 30px rgba(0,0,0,.4);transition:.15s}
+  .searchbar:focus-within{border-color:var(--cyan);background:rgba(255,255,255,.08)}
+  .hero.home .searchbar{width:min(640px,92vw);margin-top:34px}
+  .hero.results .searchbar{width:100%;max-width:680px;margin-top:16px}
+  .searchbar .mag{width:20px;height:20px;color:var(--soft);flex:none}
+  .searchbar input{all:unset;flex:1;color:#fff;font-size:17px;min-width:0}
+  .searchbar input::placeholder{color:rgba(255,255,255,.45)}
+  .searchbar button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;cursor:pointer;transition:transform .1s}
+  .searchbar button:active{transform:scale(.94)}
+  .searchbar button svg{width:19px;height:19px;color:#14100a}
 
-  .h{font-family:Fredoka;font-weight:600;font-size:20px;margin:2px 0 3px}
-  .hsub{color:var(--soft);font-size:13px;margin-bottom:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:20px}
+  .hero.results .chips{justify-content:flex-start;margin-top:14px}
+  .chiplabel{width:100%;color:rgba(255,255,255,.4);font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+  .hero.home .chiplabel{text-align:center}
+  .chip{font-size:13.5px;font-weight:500;padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.06);
+    color:var(--soft);white-space:nowrap;border:1px solid var(--line);cursor:pointer;transition:.12s}
+  .chip:hover{color:#fff;border-color:var(--cyan);background:rgba(91,224,255,.08)}
+  .chip.hot{color:var(--amber);border-color:rgba(254,215,105,.3)}
 
-  /* team + player headers */
-  .phead{display:flex;align-items:center;gap:16px;margin-bottom:20px}
-  .phead .crest{width:64px;height:64px;border-radius:17px;flex:none;display:flex;align-items:center;justify-content:center;
-    font-family:Fredoka;font-weight:700;font-size:24px;color:#fff;border:1px solid rgba(255,255,255,.12)}
-  .phead .big{width:66px;height:66px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
-    font-family:Fredoka;font-weight:700;font-size:26px;color:#fff;background:#15171c;border:1.5px solid var(--cyan2)}
-  .phead h2{font-family:Fredoka;font-weight:600;font-size:24px;letter-spacing:-.01em;line-height:1.05}
-  .phead .meta{color:var(--soft);font-size:13px;margin-top:4px;font-weight:500}
-
-  /* grids */
-  .teamgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-  .teamcard{display:flex;align-items:center;gap:13px;padding:13px 14px;background:rgba(255,255,255,.04);
-    border:1px solid var(--line);border-radius:15px;cursor:pointer;transition:.12s}
-  .teamcard:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px);background:rgba(255,255,255,.06)}
-  .teamcard .crest{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;
-    font-family:Fredoka;font-weight:700;font-size:16px;color:#fff;border:1px solid rgba(255,255,255,.1)}
-  .teamcard .tn{font-family:Fredoka;font-weight:600;font-size:15.5px;line-height:1.15;min-width:0}
-  .teamcard .ts{font-size:12px;color:var(--soft);margin-top:2px}
-
-  .rostergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px}
-  .plycard{display:flex;flex-direction:column;align-items:center;gap:9px;padding:16px 8px;background:rgba(255,255,255,.035);
-    border:1px solid var(--line);border-radius:16px;cursor:pointer;transition:.12s}
-  .plycard:hover{border-color:var(--cyan);transform:translateY(-2px)}
-  .plycard .ava{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-family:Fredoka;font-weight:700;font-size:20px;color:#fff;background:#15171c;border:1.5px solid #45506b}
-  .plycard.all .ava{background:linear-gradient(135deg,var(--amber),var(--amber2));color:#14100a;border:0}
-  .plycard .pn{font-family:Fredoka;font-weight:600;font-size:14px;text-align:center;line-height:1.15;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .plycard .pc{font-size:11.5px;color:var(--soft)}
-
-  .filters{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
-  .filters::-webkit-scrollbar{display:none}
-  .fp{font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:999px;background:rgba(255,255,255,.06);
-    color:var(--soft);white-space:nowrap;border:1px solid var(--line);cursor:pointer;transition:.1s}
-  .fp:hover{color:#fff}
-  .fp.on{background:#fff;color:#0a0a0a;border-color:#fff}
-
+  .results{margin-top:26px}
+  .status{color:var(--soft);font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin:6px 2px 14px;min-height:15px}
   .clipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:15px}
   .clip{border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--line);background:#11151d;
     box-shadow:0 12px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;cursor:pointer;animation:pop .4s ease both}
@@ -81,6 +64,7 @@
   .clip .thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,10,.3) 0%,rgba(4,6,10,0) 45%)}
   .clip .ttag{position:absolute;top:9px;left:9px;z-index:1;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
     padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);color:var(--amber)}
+  .clip .ttag.ga{left:auto;right:9px;color:#14100a;background:linear-gradient(135deg,var(--amber),var(--amber2))}
   .clip .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;z-index:1;
     background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(0,0,0,.45)}
   .clip .play:after{content:"";border-left:14px solid #0a0c11;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
@@ -91,139 +75,83 @@
 
   .empty{grid-column:1/-1;color:var(--soft);text-align:center;padding:50px 20px;font-size:14px}
   .loading{color:var(--soft);font-size:13px;padding:30px 4px}
-  footer{margin-top:48px;color:rgba(255,255,255,.4);font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+  footer{margin-top:auto;padding-top:40px;color:rgba(255,255,255,.4);font-size:12px;line-height:1.6}
   footer b{color:var(--soft)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <img class="ic" src="appicon.png" alt="Clippie"/>
-    <div class="nm">Clippie</div>
-    <div class="spacer"></div>
-    <div class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="q" placeholder="Search a player, number, or team"/>
+  <div class="hero home" id="hero">
+    <div class="brand" onclick="goHome()">
+      <img class="ic" src="appicon.png" alt="Clippie"/>
+      <div class="nm">Clippie</div>
     </div>
+    <div class="tag">Search <b>1,675 real game highlights</b> -- any player, team, play, or moment.</div>
+    <div class="searchbar">
+      <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" placeholder="Try a player, team, or play — “HRS Summer go-ahead threes”" autocomplete="off"/>
+      <button onclick="run()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="chips" id="chips"></div>
   </div>
 
-  <div class="crumbs" id="crumbs"></div>
-  <div id="view"></div>
+  <div class="results" id="results"></div>
 
-  <footer>Every clip is real game film auto-detected and cut by <b>Clippie</b>'s computer-vision pipeline. Browse and search are both powered by <b>Qdrant</b> -- team, jersey number, and play-type are payload filters; free-text search adds semantic vector ranking. Sports World Cup Hackathon 2026.</footer>
+  <footer>Every clip is real game film auto-detected and cut by <b>Clippie</b>'s computer-vision pipeline, then indexed in <b>Qdrant</b>. Your search is parsed into Qdrant filters — team, jersey number, play type, and computed game-state (go-ahead, close game) — with semantic vector ranking for free-text like player names. Sports World Cup Hackathon 2026.</footer>
 </div>
 <script>
-const PLAY_FILTERS = [
-  {label:"All", event:null},
-  {label:"Threes", event:"3PT Make"},
-  {label:"Twos", event:"2PT Make"},
-  {label:"Free Throws", event:"Free Throw"},
-  {label:"Steals", event:"Steal"},
-  {label:"Blocks", event:"Block"},
+const CHIPS = [
+  {t:"clutch buckets", hot:true},
+  {t:"HRS Summer go-ahead", hot:true},
+  {t:"Nick Taubes threes"},
+  {t:"Team Cali 16u steals"},
+  {t:"Lily Hamblin"},
 ];
 const TAG = {"3PT Make":"3PT","2PT Make":"2PT","Free Throw":"FT","Steal":"STEAL","Block":"BLOCK","Assist":"ASSIST","Assist (2PT)":"ASSIST","Rebound":"REB","Off. Rebound":"REB"};
-const HUES=[["#4b6cb7","#182848"],["#c94b4b","#4b134f"],["#11998e","#0b3d3a"],["#654ea3","#2a1e4f"],["#e96443","#5a1e1e"],["#2b5876","#12314a"],["#8e2de2","#3a1055"],["#016175","#013a45"]];
-function hue(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return HUES[h%HUES.length];}
-function crestStyle(name){const [a,b]=hue(name);return `background:linear-gradient(135deg,${a},${b})`;}
-function initials(t){return t.replace(/[^A-Za-z0-9 ].*/,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||t.slice(0,2).toUpperCase();}
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
-const view=document.getElementById('view'), crumbs=document.getElementById('crumbs');
-const api=(p)=>fetch(p).then(r=>r.json());
+const hero=document.getElementById('hero'), results=document.getElementById('results'), chipsEl=document.getElementById('chips'), qEl=document.getElementById('q');
 
-function setCrumbs(parts){
-  crumbs.innerHTML='';
-  parts.forEach((p,i)=>{
-    if(i) crumbs.appendChild(el(`<span class="sep">›</span>`));
-    if(p.go){const a=el(`<a>${p.label}</a>`);a.onclick=p.go;crumbs.appendChild(a);}
-    else crumbs.appendChild(el(`<span class="cur">${p.label}</span>`));
-  });
+CHIPS.forEach(c=>{
+  const b=el(`<div class="chip${c.hot?' hot':''}">${c.t}</div>`);
+  b.onclick=()=>{qEl.value=c.t;run();};
+  chipsEl.appendChild(b);
+});
+qEl.addEventListener('keydown',e=>{if(e.key==='Enter')run();});
+
+function goHome(){
+  hero.className='hero home'; results.innerHTML=''; qEl.value=''; qEl.focus();
+  chipsEl.previousElementSibling; renderChips(false);
+}
+function renderChips(compact){
+  chipsEl.innerHTML='';
+  if(compact) chipsEl.appendChild(el(`<div class="chiplabel">Try</div>`));
+  CHIPS.forEach(c=>{const b=el(`<div class="chip${c.hot?' hot':''}">${c.t}</div>`);b.onclick=()=>{qEl.value=c.t;run();};chipsEl.appendChild(b);});
 }
 
-async function showTeams(){
-  setCrumbs([{label:"Teams"}]);
-  view.innerHTML=`<div class="h">Browse by team</div><div class="hsub">Pick a team to see its roster, then a player to pull their highlights.</div><div class="loading">Loading teams…</div>`;
-  const {teams}=await api('/api/teams');
-  const grid=el(`<div class="teamgrid"></div>`);
-  teams.forEach(t=>{
-    const c=el(`<div class="teamcard"><div class="crest" style="${crestStyle(t.team)}">${initials(t.team)}</div><div><div class="tn">${t.team}</div><div class="ts">${t.count} highlights</div></div></div>`);
-    c.onclick=()=>showRoster(t.team);
-    grid.appendChild(c);
-  });
-  view.innerHTML=`<div class="h">Browse by team</div><div class="hsub">Pick a team to see its roster, then a player to pull their highlights.</div>`;
-  view.appendChild(grid);
+async function run(){
+  const q=qEl.value.trim(); if(!q) return;
+  hero.className='hero results';
+  renderChips(true);
+  results.innerHTML=`<div class="status">Searching…</div><div class="clipgrid"></div>`;
+  const grid=results.querySelector('.clipgrid'), status=results.querySelector('.status');
+  try{
+    const d=await fetch('/api/search?q='+encodeURIComponent(q)).then(r=>r.json());
+    const rs=d.results||[];
+    if(!rs.length){status.textContent='';grid.innerHTML=`<div class="empty">No clips for “${q}”. Try a player, team, play type, or “go-ahead”.</div>`;return;}
+    status.textContent=`${rs.length} clip${rs.length>1?'s':''} for “${q}”`;
+    grid.innerHTML='';
+    rs.forEach(c=>{
+      const who=[c.player,c.number?('#'+c.number):''].filter(Boolean).join(' ')||c.team||'Highlight';
+      const tag=TAG[c.event]||(c.event||'').toUpperCase().slice(0,6);
+      const ga=c.go_ahead?`<div class="ttag ga">⚡ GO-AHEAD</div>`:'';
+      grid.appendChild(el(`<a class="clip" href="${c.video}" target="_blank" rel="noopener">
+        <div class="thumb">${c.thumb?`<img loading="lazy" src="${c.thumb}"/>`:''}${tag?`<div class="ttag">${tag}</div>`:''}${ga}<div class="play"></div></div>
+        <div class="meta"><div style="min-width:0"><div class="who">${who}</div><div class="mu">${c.matchup||c.team||''}</div></div>${c.score?`<div class="sc">${c.score}</div>`:''}</div>
+      </a>`));
+    });
+  }catch(e){status.textContent='Error: '+e;}
 }
-
-async function showRoster(team){
-  setCrumbs([{label:"Teams",go:showTeams},{label:team}]);
-  view.innerHTML=`<div class="phead"><div class="crest" style="${crestStyle(team)}">${initials(team)}</div><div><h2>${team}</h2><div class="meta">Loading roster…</div></div></div>`;
-  const {players}=await api('/api/roster?team='+encodeURIComponent(team));
-  const total=players.reduce((s,p)=>s+p.count,0);
-  view.innerHTML=`<div class="phead"><div class="crest" style="${crestStyle(team)}">${initials(team)}</div><div><h2>${team}</h2><div class="meta">${players.length} players · ${total} highlights</div></div></div>`;
-  const grid=el(`<div class="rostergrid"></div>`);
-  const allc=el(`<div class="plycard all"><div class="ava">▶</div><div class="pn">Full team reel</div><div class="pc">${total} clips</div></div>`);
-  allc.onclick=()=>showClips({team});
-  grid.appendChild(allc);
-  players.forEach(p=>{
-    const label=p.name||('#'+p.number);
-    const av=p.number?('#'+p.number):initials(p.name);
-    const c=el(`<div class="plycard"><div class="ava">${av}</div><div class="pn">${label}</div><div class="pc">${p.count} clip${p.count>1?'s':''}</div></div>`);
-    c.onclick=()=>showClips({team,player:p});
-    grid.appendChild(c);
-  });
-  view.appendChild(grid);
-}
-
-async function showClips(ctx, event=null){
-  const {team,player}=ctx;
-  const who = player ? (player.name||('#'+player.number)) : team;
-  setCrumbs([{label:"Teams",go:showTeams},{label:team,go:()=>showRoster(team)},{label:who}]);
-  const head = player
-    ? `<div class="phead"><div class="big">${player.number?('#'+player.number):initials(player.name)}</div><div><h2>${who}</h2><div class="meta">${team}</div></div></div>`
-    : `<div class="phead"><div class="crest" style="${crestStyle(team)}">${initials(team)}</div><div><h2>${team}</h2><div class="meta">Full team reel</div></div></div>`;
-  const filt=el(`<div class="filters"></div>`);
-  PLAY_FILTERS.forEach(f=>{
-    const b=el(`<div class="fp${f.event===event?' on':''}">${f.label}</div>`);
-    b.onclick=()=>showClips(ctx,f.event);
-    filt.appendChild(b);
-  });
-  view.innerHTML=head;
-  view.appendChild(filt);
-  const holder=el(`<div class="clipgrid"><div class="loading">Loading clips…</div></div>`);
-  view.appendChild(holder);
-  let url='/api/clips?team='+encodeURIComponent(team);
-  if(player&&player.number) url+='&number='+encodeURIComponent(player.number);
-  if(player&&player.name&&!player.number) url+='&name='+encodeURIComponent(player.name);
-  if(event) url+='&event='+encodeURIComponent(event);
-  const {results}=await api(url);
-  renderClips(holder,results);
-}
-
-function renderClips(holder,results){
-  holder.innerHTML='';
-  if(!results.length){holder.appendChild(el(`<div class="empty">No clips for this filter.</div>`));return;}
-  results.forEach(c=>{
-    const who=[c.player,c.number?('#'+c.number):''].filter(Boolean).join(' ')||c.team||'Highlight';
-    const tag=TAG[c.event]||(c.event||'').toUpperCase().slice(0,6);
-    const a=el(`<a class="clip" href="${c.video}" target="_blank" rel="noopener">
-      <div class="thumb">${c.thumb?`<img loading="lazy" src="${c.thumb}"/>`:''}${tag?`<div class="ttag">${tag}</div>`:''}<div class="play"></div></div>
-      <div class="meta"><div style="min-width:0"><div class="who">${who}</div><div class="mu">${c.matchup||c.team||''}</div></div>${c.score?`<div class="sc">${c.score}</div>`:''}</div>
-    </a>`);
-    holder.appendChild(a);
-  });
-}
-
-async function runSearch(q){
-  setCrumbs([{label:"Teams",go:showTeams},{label:`Search: "${q}"`}]);
-  view.innerHTML=`<div class="h">Results for "${q}"</div><div class="hsub">Free-text search — semantic ranking over the full highlight library.</div>`;
-  const holder=el(`<div class="clipgrid"><div class="loading">Searching…</div></div>`);
-  view.appendChild(holder);
-  const {results}=await api('/api/search?q='+encodeURIComponent(q));
-  renderClips(holder,results||[]);
-}
-
-const qEl=document.getElementById('q');
-qEl.addEventListener('keydown',e=>{if(e.key==='Enter'){const v=qEl.value.trim();if(v)runSearch(v);}});
-showTeams();
+qEl.focus();
 </script>
 </body>
 </html>
