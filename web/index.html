@@ -17,9 +17,9 @@
   .wrap{max-width:1100px;margin:0 auto;padding:22px 20px 90px;min-height:100dvh;display:flex;flex-direction:column}
 
   /* hero (search is the product) */
-  .hero{display:flex;flex-direction:column;align-items:center;text-align:center;transition:padding .35s ease}
-  .hero.home{padding-top:min(20vh,150px)}
-  .hero.results{padding-top:8px;align-items:stretch}
+  .hero{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .hero.home{flex:1 1 auto;justify-content:center;padding-bottom:12vh}
+  .hero.results{flex:none;padding-top:8px;align-items:stretch}
   .brand{display:flex;align-items:center;gap:12px;justify-content:center;cursor:pointer}
   .brand .ic{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.5)}
   .brand .nm{font-family:Pacifico;font-size:40px;line-height:1;color:#fafafa}
@@ -38,10 +38,13 @@
   .searchbar .mag{width:20px;height:20px;color:var(--soft);flex:none}
   .searchbar input{all:unset;flex:1;color:#fff;font-size:17px;min-width:0}
   .searchbar input::placeholder{color:rgba(255,255,255,.45)}
-  .searchbar button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;flex:none;
+  .searchbar .go{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;flex:none;
     background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;cursor:pointer;transition:transform .1s}
-  .searchbar button:active{transform:scale(.94)}
-  .searchbar button svg{width:19px;height:19px;color:#14100a}
+  .searchbar .go:active{transform:scale(.94)}
+  .searchbar .go svg{width:19px;height:19px;color:#14100a}
+  .searchbar .clr{width:34px;height:34px;border-radius:50%;flex:none;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.09);border:0;cursor:pointer}
+  .searchbar .clr svg{width:15px;height:15px;color:var(--soft)}
+  .searchbar.has .clr{display:inline-flex}
 
   .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:20px}
   .hero.results .chips{justify-content:flex-start;margin-top:14px}
@@ -90,7 +93,8 @@
     <div class="searchbar">
       <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="q" placeholder="Try a player, team, or play — “HRS Summer go-ahead threes”" autocomplete="off"/>
-      <button onclick="run()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="clr" onclick="goHome()" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button class="go" onclick="run()" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -116,11 +120,13 @@ CHIPS.forEach(c=>{
   b.onclick=()=>{qEl.value=c.t;run();};
   chipsEl.appendChild(b);
 });
-qEl.addEventListener('keydown',e=>{if(e.key==='Enter')run();});
+const bar=document.querySelector('.searchbar');
+qEl.addEventListener('keydown',e=>{if(e.key==='Enter')run();if(e.key==='Escape')goHome();});
+qEl.addEventListener('input',()=>bar.classList.toggle('has',!!qEl.value.trim()));
 
 function goHome(){
-  hero.className='hero home'; results.innerHTML=''; qEl.value=''; qEl.focus();
-  chipsEl.previousElementSibling; renderChips(false);
+  hero.className='hero home'; results.innerHTML=''; qEl.value=''; bar.classList.remove('has');
+  renderChips(false); qEl.focus();
 }
 function renderChips(compact){
   chipsEl.innerHTML='';
@@ -130,6 +136,7 @@ function renderChips(compact){
 
 async function run(){
   const q=qEl.value.trim(); if(!q) return;
+  bar.classList.add('has');
   hero.className='hero results';
   renderChips(true);
   results.innerHTML=`<div class="status">Searching…</div><div class="clipgrid"></div>`;
