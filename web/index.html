@@ -26,9 +26,10 @@
   .hero.results .brand{justify-content:flex-start}
   .hero.results .brand .ic{width:34px;height:34px}
   .hero.results .brand .nm{font-size:27px}
-  .tag{color:var(--soft);font-size:15px;margin-top:14px}
-  .tag b{color:#fff;font-weight:600}
-  .hero.results .tag{display:none}
+  .headline{font-family:Fredoka;font-weight:600;font-size:clamp(25px,4.4vw,40px);letter-spacing:-.02em;line-height:1.08;margin-top:20px}
+  .subhead{color:var(--soft);font-size:15.5px;margin-top:12px;max-width:560px;line-height:1.5}
+  .subhead b{color:#fff;font-weight:600}
+  .hero.results .headline,.hero.results .subhead{display:none}
 
   .searchbar{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
     border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 8px 30px rgba(0,0,0,.4);transition:.15s}
@@ -38,10 +39,10 @@
   .searchbar .mag{width:20px;height:20px;color:var(--soft);flex:none}
   .searchbar input{all:unset;flex:1;color:#fff;font-size:17px;min-width:0}
   .searchbar input::placeholder{color:rgba(255,255,255,.45)}
-  .searchbar .go{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;flex:none;
-    background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;cursor:pointer;transition:transform .1s}
-  .searchbar .go:active{transform:scale(.94)}
-  .searchbar .go svg{width:19px;height:19px;color:#14100a}
+  .searchbar .go{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;flex:none;
+    background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;cursor:pointer;transition:transform .1s;color:#14100a;font-family:Fredoka,Inter,sans-serif;font-weight:600;font-size:15px;white-space:nowrap}
+  .searchbar .go:active{transform:scale(.96)}
+  .searchbar .go svg{width:17px;height:17px;fill:#14100a}
   .searchbar .clr{width:34px;height:34px;border-radius:50%;flex:none;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.09);border:0;cursor:pointer}
   .searchbar .clr svg{width:15px;height:15px;color:var(--soft)}
   .searchbar.has .clr{display:inline-flex}
@@ -126,12 +127,13 @@
       <img class="ic" src="appicon.png" alt="Clippie"/>
       <div class="nm">Clippie</div>
     </div>
-    <div class="tag">Search <b>1,675 real game highlights</b> -- any player, team, play, or moment.</div>
+    <div class="headline">Search basketball like you remember it.</div>
+    <div class="subhead">Describe the player, team, score, or moment -- Clippie finds the exact clip across <b>1,675 real game highlights</b>.</div>
     <div class="searchbar">
       <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="q" placeholder="Try a player, team, or play — “HRS Summer go-ahead threes”" autocomplete="off"/>
+      <input id="q" placeholder="the three that put HRS ahead late" autocomplete="off"/>
       <button class="clr" onclick="goHome()" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <button class="go" onclick="run()" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="go" onclick="run()" aria-label="Find it"><svg viewBox="0 0 24 24"><path d="M12 2l1.9 5.2L19 9l-5.1 1.8L12 16l-1.9-5.2L5 9l5.1-1.8z"/><path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8z"/></svg>Find it</button>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -149,13 +151,23 @@
 </div>
 <script>
 const CHIPS = [
-  {t:"clutch buckets"},
-  {t:"HRS Summer go-ahead"},
-  {t:"Nick Taubes threes"},
+  {t:"every HRS go-ahead bucket"},
+  {t:"Nick Taubes vs Emerald"},
+  {t:"clutch threes in close games"},
   {t:"Team Cali 16u steals"},
-  {t:"Lily Hamblin"},
+  {t:"Lily Hamblin highlights"},
 ];
-let curQ=null, RESULTS=[];
+const PLACEHOLDERS = [
+  "the three that put HRS ahead late",
+  "every bucket that gave HRS the lead",
+  "clutch threes in close games",
+  "every make by number 11",
+  "when Team Cali took the lead",
+  "every Nick Taubes three",
+  "all HRS makes vs Emerald",
+  "Lily Hamblin in close games",
+];
+let curQ=null, RESULTS=[], _phi=0;
 const TAG = {"3PT Make":"3PT","2PT Make":"2PT","Free Throw":"FT","Steal":"STEAL","Block":"BLOCK","Assist":"ASSIST","Assist (2PT)":"ASSIST","Rebound":"REB","Off. Rebound":"REB"};
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
 const hero=document.getElementById('hero'), results=document.getElementById('results'), chipsEl=document.getElementById('chips'), qEl=document.getElementById('q');
@@ -180,6 +192,15 @@ function renderChips(compact){
   });
 }
 renderChips(false);
+
+// rotate the placeholder to show off natural-language moment search (pauses while typing)
+qEl.placeholder=PLACEHOLDERS[0];
+setInterval(()=>{
+  if(qEl.value||document.activeElement===qEl||hero.className.includes('results'))return;
+  _phi=(_phi+1)%PLACEHOLDERS.length;
+  qEl.style.transition='opacity .25s'; qEl.style.opacity='0';
+  setTimeout(()=>{qEl.placeholder=PLACEHOLDERS[_phi];qEl.style.opacity='1';},250);
+},3200);
 
 async function run(){
   const q=qEl.value.trim(); if(!q) return;

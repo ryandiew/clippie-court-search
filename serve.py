@@ -66,7 +66,7 @@ def age_strip(t):
 
 
 def load_teams():
-    names = set()
+    counts = {}
     nxt = None
     while True:
         body = {"limit": 512, "with_payload": ["team"], "with_vector": False}
@@ -76,19 +76,29 @@ def load_teams():
         for p in r["points"]:
             t = (p["payload"].get("team") or "").strip()
             if t:
-                names.add(t)
+                counts[t] = counts.get(t, 0) + 1
         nxt = r.get("next_page_offset")
         if not nxt:
             break
-    # Exact team names win; add age-stripped aliases only where they don't collide
-    # (so "NBBA" -> NBBA and "NBBA 15u" -> NBBA 15u, not one clobbering the other).
-    seen = {}
-    for t in names:
-        seen[t.lower()] = t
-    for t in names:
-        a = age_strip(t)
-        if a and a not in seen:
-            seen[a] = t
+    # Each match-key resolves to the team with the most clips (so a shared alias like
+    # "hrs" -> HRS SUMMER 26' beats the smaller "HRS Summer", and "vs" collisions win big).
+    cand = {}  # key -> (count, team)
+
+    def add(key, team):
+        if not key:
+            return
+        c = counts[team]
+        if key not in cand or c > cand[key][0]:
+            cand[key] = (c, team)
+
+    for t in counts:
+        add(t.lower(), t)          # full name
+        add(age_strip(t), t)       # "Bay City 17u" -> "bay city"
+        first = t.split()[0] if t.split() else ""
+        letters = re.sub(r"[^A-Za-z]", "", first)
+        if first.isupper() and 2 <= len(letters) <= 4:  # acronym teams: HRS, PHX, WBC...
+            add(letters.lower(), t)
+    seen = {k: v[1] for k, v in cand.items()}
     # longest keys first so "team cali 16u" wins over "team cali"
     return sorted(([k, v] for k, v in seen.items() if k), key=lambda kv: -len(kv[0]))
 
@@ -98,12 +108,20 @@ def parse(q):
     Returns (qdrant_filter, residual_text_for_semantic_rank)."""
     ql = " " + q.lower() + " "
     must = []
-    used = []
+
+    # opponent: "... vs / against X" -> opp filter (matched before the primary team)
+    om = re.search(r"\b(?:vs|versus|against)\b\s+", ql)
+    if om:
+        tail = " " + ql[om.end():].strip() + " "
+        for key, team in TEAMS:
+            if key and (" " + key + " ") in tail:
+                must.append({"key": "opp", "match": {"value": team}})
+                ql = ql[: om.start()] + " " + tail.replace(" " + key + " ", " ", 1) + " "
+                break
 
     for key, team in TEAMS:
         if key and (" " + key + " ") in ql:
             must.append({"key": "team", "match": {"value": team}})
-            used.append(key)
             ql = ql.replace(" " + key + " ", " ")
             break
 
