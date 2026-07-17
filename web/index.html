@@ -81,6 +81,42 @@
   .loading{color:var(--soft);font-size:13px;padding:30px 4px}
   footer{margin-top:auto;padding-top:40px;color:rgba(255,255,255,.4);font-size:12px;line-height:1.6}
   footer b{color:var(--soft)}
+
+  /* ---- TikTok-style clip feed (matches highlights.clippie.app) ---- */
+  .ov{position:fixed;inset:0;z-index:100;background:#000;display:none}
+  .ov.on{display:block}
+  .ov .stage{position:relative;width:100%;max-width:520px;height:100dvh;margin:0 auto;background:#000}
+  .feed{position:absolute;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+  .feed::-webkit-scrollbar{display:none}
+  .slide{position:relative;width:100%;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;background:#000}
+  .ovstagewrap{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;width:100%}
+  .ovx{position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:8;width:38px;height:38px;border:none;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .ovx svg{width:16px;height:16px;fill:#fff}
+  .ovstage{position:relative;width:100%;height:100%;background:#000;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .ovstage video{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+  .ovbig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity .2s}
+  .ovbig .pc{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}
+  .ovbig .pc svg{width:26px;height:26px;fill:#fff;margin-left:3px}
+  .ovstage.playing .ovbig{opacity:0}
+  .ovtag{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:6;display:flex;gap:7px}
+  .ovtag .t{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:var(--amber)}
+  .ovtag .t.ga{color:#14100a;background:linear-gradient(135deg,var(--amber),var(--amber2))}
+  .ovctrls{position:absolute;left:0;right:0;bottom:104px;display:flex;align-items:center;gap:10px;padding:10px 16px;z-index:5}
+  .ovctrls .ic{all:unset;cursor:pointer;color:#fff;width:26px;text-align:center}
+  .ovctrls .ic svg{width:18px;height:18px;fill:#fff;display:block;margin:0 auto}
+  .ovbar{flex:1;height:18px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+  .ovbar .track{position:relative;width:100%;height:4px;border-radius:99px;background:rgba(255,255,255,.28);overflow:hidden}
+  .ovbarf{height:100%;width:0;background:var(--amber);border-radius:99px}
+  .ovtime{font-size:11.5px;color:#fff;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+  .ovbody{position:absolute;left:0;right:0;bottom:0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));z-index:4;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.86))}
+  .ovhead{display:flex;align-items:center;gap:11px}
+  .ovav{width:44px;height:44px;flex:none;border-radius:50%;background:#15171c;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:Fredoka;font-weight:600;font-size:15px;color:#fff}
+  .ovid{flex:1;min-width:0}
+  .ovname{font-family:Fredoka;font-weight:600;font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ovhandle{font-size:13px;color:var(--soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ovsc{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.14);border-radius:7px;padding:5px 10px;flex:none;font-variant-numeric:tabular-nums}
+  .swipehint{position:absolute;left:0;right:0;bottom:168px;text-align:center;color:rgba(255,255,255,.65);font-size:12.5px;font-weight:500;z-index:4;pointer-events:none;animation:fadehint 3.5s ease forwards}
+  @keyframes fadehint{0%,55%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -102,6 +138,13 @@
 
   <div class="results" id="results"></div>
 
+  <div class="ov" id="ov">
+    <div class="stage">
+      <button class="ovx" onclick="closeFeed()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18.3 5.7a1 1 0 00-1.4 0L12 10.6 7.1 5.7A1 1 0 105.7 7.1L10.6 12l-4.9 4.9a1 1 0 101.4 1.4L12 13.4l4.9 4.9a1 1 0 001.4-1.4L13.4 12l4.9-4.9a1 1 0 000-1.4z"/></svg></button>
+      <div class="feed" id="feed"></div>
+    </div>
+  </div>
+
   <footer>Every clip is real game film auto-detected and cut by <b>Clippie</b>'s computer-vision pipeline, then indexed in <b>Qdrant</b>. Your search is parsed into Qdrant filters — team, jersey number, play type, and computed game-state (go-ahead, close game) — with semantic vector ranking for free-text like player names. Sports World Cup Hackathon 2026.</footer>
 </div>
 <script>
@@ -112,7 +155,7 @@ const CHIPS = [
   {t:"Team Cali 16u steals"},
   {t:"Lily Hamblin"},
 ];
-let curQ=null;
+let curQ=null, RESULTS=[];
 const TAG = {"3PT Make":"3PT","2PT Make":"2PT","Free Throw":"FT","Steal":"STEAL","Block":"BLOCK","Assist":"ASSIST","Assist (2PT)":"ASSIST","Rebound":"REB","Off. Rebound":"REB"};
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;};
 const hero=document.getElementById('hero'), results=document.getElementById('results'), chipsEl=document.getElementById('chips'), qEl=document.getElementById('q');
@@ -151,17 +194,116 @@ async function run(){
     const rs=d.results||[];
     if(!rs.length){status.textContent='';grid.innerHTML=`<div class="empty">No clips for “${q}”. Try a player, team, play type, or “go-ahead”.</div>`;return;}
     status.textContent=`${rs.length} clip${rs.length>1?'s':''} for “${q}”`;
+    RESULTS=rs;
     grid.innerHTML='';
-    rs.forEach(c=>{
+    rs.forEach((c,i)=>{
       const who=[c.player,c.number?('#'+c.number):''].filter(Boolean).join(' ')||c.team||'Highlight';
       const tag=TAG[c.event]||(c.event||'').toUpperCase().slice(0,6);
       const ga=c.go_ahead?`<div class="ttag ga">⚡ GO-AHEAD</div>`:'';
-      grid.appendChild(el(`<a class="clip" href="${c.video}" target="_blank" rel="noopener">
+      const card=el(`<div class="clip">
         <div class="thumb">${c.thumb?`<img loading="lazy" src="${c.thumb}"/>`:''}${tag?`<div class="ttag">${tag}</div>`:''}${ga}<div class="play"></div></div>
         <div class="meta"><div style="min-width:0"><div class="who">${who}</div><div class="mu">${c.matchup||c.team||''}</div></div>${c.score?`<div class="sc">${c.score}</div>`:''}</div>
-      </a>`));
+      </div>`);
+      card.onclick=()=>openFeed(RESULTS,i);
+      grid.appendChild(card);
     });
   }catch(e){status.textContent='Error: '+e;}
+}
+
+// ---- TikTok-style clip feed (mirrors highlights.clippie.app) ----
+let _obs=null,_active=-1,_raf=0,_muted=false;
+const IC_PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+const IC_PAUSE='<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+const IC_VOL='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4zm12.5 3a4.5 4.5 0 00-2.5-4.03v8.06A4.5 4.5 0 0016.5 12z"/></svg>';
+const IC_MUTE='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9.5l5 5m0-5l-5 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>';
+const fmt=t=>{t=Math.max(0,t|0);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+const inits=s=>(s||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+function slideHTML(c,i){
+  const who=[c.player,c.number?('#'+c.number):''].filter(Boolean).join(' ')||c.team||'Highlight';
+  const av=c.player?inits(c.player):(c.number?('#'+c.number):inits(c.team));
+  const tag=TAG[c.event]||(c.event||'').toUpperCase().slice(0,6);
+  const tags=`${tag?`<span class="t">${tag}</span>`:''}${c.go_ahead?'<span class="t ga">⚡ GO-AHEAD</span>':''}`;
+  return `<div class="slide" data-i="${i}">
+    <div class="ovtag">${tags}</div>
+    <div class="ovstagewrap" data-close="1">
+      <div class="ovstage" data-act="toggle">
+        <video playsinline preload="none" webkit-playsinline loop data-src="${c.video}"></video>
+        <div class="ovbig"><div class="pc">${IC_PLAY}</div></div>
+      </div>
+      <div class="ovctrls" data-stop="1">
+        <button class="ic pp" data-act="toggle">${IC_PAUSE}</button>
+        <div class="ovbar" data-stop="1"><div class="track"><div class="ovbarf"></div></div></div>
+        <span class="ovtime">0:00</span>
+        <button class="ic mute" data-act="mute">${IC_VOL}</button>
+      </div>
+    </div>
+    <div class="ovbody" data-stop="1">
+      <div class="ovhead">
+        <div class="ovav">${av}</div>
+        <div class="ovid"><div class="ovname">${who}</div><div class="ovhandle">${c.matchup||c.team||''}</div></div>
+        ${c.score?`<div class="ovsc">${c.score}</div>`:''}
+      </div>
+    </div>
+    ${i===0&&RESULTS.length>1?'<div class="swipehint">Swipe up for the next clip ↑</div>':''}
+  </div>`;
+}
+function openFeed(list,start){
+  RESULTS=list;
+  const feed=document.getElementById('feed');
+  feed.innerHTML=list.map((c,i)=>slideHTML(c,i)).join('');
+  document.getElementById('ov').classList.add('on');
+  document.body.style.overflow='hidden';
+  if(_obs)_obs.disconnect();
+  _obs=new IntersectionObserver(onIntersect,{root:feed,threshold:0.55});
+  feed.querySelectorAll('.slide').forEach(s=>_obs.observe(s));
+  _active=-1;
+  const t=feed.children[start]; if(t)feed.scrollTop=t.offsetTop;
+  setActive(start);
+  cancelAnimationFrame(_raf);_raf=requestAnimationFrame(tick);
+  document.addEventListener('keydown',feedKey);
+  feed.addEventListener('click',feedClick);
+}
+function onIntersect(es){let best=null;for(const e of es){if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e;}if(best){const i=+best.target.dataset.i;if(i!==_active)setActive(i);}}
+function setActive(i){
+  _active=i;
+  document.querySelectorAll('#feed .slide').forEach(s=>{
+    const si=+s.dataset.i,v=s.querySelector('video'),stage=s.querySelector('.ovstage');
+    if(Math.abs(si-i)<=1){if(!v.src&&v.dataset.src)v.src=v.dataset.src;}
+    else if(v.src){try{v.pause();}catch(_){}v.removeAttribute('src');v.load();}
+    if(si===i){
+      v.muted=_muted;
+      v.onplay=()=>{stage.classList.add('playing');s.querySelector('.pp').innerHTML=IC_PAUSE;};
+      v.onpause=()=>{stage.classList.remove('playing');s.querySelector('.pp').innerHTML=IC_PLAY;};
+      const p=v.play();if(p&&p.catch)p.catch(()=>{v.muted=true;_muted=true;s.querySelector('.mute').innerHTML=IC_MUTE;v.play().catch(()=>{});});
+      s.querySelector('.mute').innerHTML=v.muted?IC_MUTE:IC_VOL;
+    }else{try{v.pause();v.currentTime=0;}catch(_){}}
+  });
+}
+function tick(){const s=document.querySelector(`#feed .slide[data-i="${_active}"]`);if(s){const v=s.querySelector('video'),f=s.querySelector('.ovbarf'),t=s.querySelector('.ovtime');if(v&&v.duration){f.style.width=(v.currentTime/v.duration*100)+'%';t.textContent=fmt(v.currentTime);}}_raf=requestAnimationFrame(tick);}
+function feedKey(e){
+  if(e.key==='Escape'){closeFeed();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();
+    const d=e.key==='ArrowDown'?1:-1,ni=Math.max(0,Math.min(RESULTS.length-1,_active+d));
+    const t=document.querySelector(`#feed .slide[data-i="${ni}"]`);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+function feedClick(e){
+  const s=e.target.closest('.slide');if(!s)return;
+  const act=e.target.closest('[data-act]'),stop=e.target.closest('[data-stop]'),close=e.target.closest('[data-close]');
+  if(act){const a=act.dataset.act,v=s.querySelector('video');
+    if(a==='toggle'){if(v.paused)v.play().catch(()=>{});else v.pause();}
+    else if(a==='mute'){_muted=!_muted;v.muted=_muted;s.querySelector('.mute').innerHTML=v.muted?IC_MUTE:IC_VOL;}
+    return;}
+  if(close&&!stop){closeFeed();}
+}
+function closeFeed(){
+  document.getElementById('ov').classList.remove('on');
+  document.body.style.overflow='';
+  cancelAnimationFrame(_raf);
+  if(_obs)_obs.disconnect();
+  document.removeEventListener('keydown',feedKey);
+  document.querySelectorAll('#feed video').forEach(v=>{try{v.pause();}catch(_){}v.removeAttribute('src');v.load();});
+  document.getElementById('feed').innerHTML='';
 }
 qEl.focus();
 </script>
