@@ -30,18 +30,18 @@
   .headline{font-family:Fredoka;font-weight:500;font-size:clamp(21px,2.7vw,27px);letter-spacing:-.01em;line-height:1.15;margin-top:22px;color:#f2f4f8}
   .hero.results .headline{display:none}
 
-  .searchbar{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-    border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 8px 30px rgba(0,0,0,.4);transition:.15s}
-  .searchbar:focus-within{border-color:var(--cyan);background:rgba(255,255,255,.08)}
+  .searchbar{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);
+    border-radius:999px;padding:6px 6px 6px 20px;transition:border-color .15s,background .15s}
+  .searchbar:focus-within{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
   .hero.home .searchbar{width:min(640px,92vw);margin-top:34px}
   .hero.results .searchbar{width:100%;max-width:680px;margin-top:16px}
-  .searchbar .mag{width:20px;height:20px;color:var(--soft);flex:none}
-  .searchbar input{all:unset;flex:1;color:#fff;font-size:17px;min-width:0}
-  .searchbar input::placeholder{color:rgba(255,255,255,.45)}
-  .searchbar .go{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;flex:none;
-    background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;cursor:pointer;transition:transform .1s;color:#14100a;font-family:Fredoka,Inter,sans-serif;font-weight:600;font-size:15px;white-space:nowrap}
-  .searchbar .go:active{transform:scale(.96)}
-  .searchbar .go svg{width:17px;height:17px;fill:#14100a}
+  .searchbar .mag{width:19px;height:19px;color:rgba(255,255,255,.5);flex:none}
+  .searchbar input{all:unset;flex:1;color:#fff;font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:2px}
+  .searchbar input::placeholder{color:rgba(255,255,255,.4)}
+  .searchbar .go{display:inline-flex;align-items:center;gap:7px;height:46px;padding:0 20px;border-radius:999px;flex:none;
+    background:var(--amber);border:0;cursor:pointer;transition:filter .12s;color:#14100a;font-family:Fredoka,Inter,sans-serif;font-weight:600;font-size:15px;white-space:nowrap}
+  .searchbar .go:hover{filter:brightness(1.05)}
+  .searchbar .go svg{width:16px;height:16px;fill:#14100a;opacity:.85}
   .searchbar .clr{width:34px;height:34px;border-radius:50%;flex:none;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.09);border:0;cursor:pointer}
   .searchbar .clr svg{width:15px;height:15px;color:var(--soft)}
   .searchbar.has .clr{display:inline-flex}
