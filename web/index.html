@@ -137,13 +137,15 @@
     .brand .ic{width:34px;height:34px}
     .brand .nm{font-size:29px}
     .headline{font-size:19px;margin-top:15px;padding:0 6px}
-    .hero.home{padding-bottom:22vh}
+    .hero.home{padding-bottom:6vh}
     .hero.home .searchbar{width:100%;margin-top:22px}
     .searchbar{padding:5px 5px 5px 15px;gap:8px}
     .searchbar input{font-size:15px}
     .searchbar .go{height:42px;padding:0 15px;font-size:13.5px;gap:6px}
-    /* chips: one tidy swipeable row instead of wrapping to 3 lines */
-    .chips{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin-top:16px;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+    /* chips: one tidy swipeable row, full-width so it starts at the first chip
+       (align-self:stretch overrides the hero's align-items:center, which was
+       centering the overflow and cutting the first chips off the left edge) */
+    .chips{align-self:stretch;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin-top:16px;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 92%,transparent)}
     .chips::-webkit-scrollbar{display:none}
     .chip{flex:none}
     .results{margin-top:18px}
