@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Clippie Court Search</title>
+<meta name="theme-color" content="#06070a"/>
+<link rel="apple-touch-icon" href="appicon.png"/><link rel="icon" href="appicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--amber:#FED769;--amber2:#FF7D00;--cyan:#5BE0FF;--cyan2:#49B3FE;--ink:#fff;--soft:rgba(255,255,255,.62);--line:rgba(255,255,255,.08)}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{font-family:Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;color:#fff}
+  body{background:#080809;min-height:100dvh}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 20px 90px}
+
+  .bar{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .bar .ic{width:38px;height:38px;border-radius:11px;flex:none;object-fit:cover;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+  .bar .nm{font-family:Pacifico;font-size:27px;line-height:1;color:#fafafa}
+  .bar .spacer{flex:1}
+  .bar .tag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#0a0c11;background:var(--amber);padding:7px 13px;border-radius:999px}
+  .bar .tag svg{width:14px;height:14px}
+  .sub{color:var(--soft);font-size:15px;margin:14px 2px 22px;max-width:760px;line-height:1.5}
+  .sub b{color:#fff;font-weight:600}
+  .sub .qd{color:var(--cyan);font-weight:700}
+
+  .search{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 18px}
+  .search svg.mag{width:19px;height:19px;color:var(--soft);flex:none}
+  .search input{all:unset;flex:1;color:#fff;font-size:16px;padding:12px 0}
+  .search input::placeholder{color:rgba(255,255,255,.42)}
+  .search button{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#0a0c11;
+    background:linear-gradient(135deg,var(--amber),var(--amber2));border:0;border-radius:12px;padding:12px 20px;cursor:pointer;transition:transform .1s}
+  .search button:active{transform:scale(.97)}
+  .search button svg{width:15px;height:15px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 4px}
+  .chip{font-size:13.5px;font-weight:500;padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.06);
+    color:var(--soft);white-space:nowrap;border:1px solid var(--line);cursor:pointer;transition:.12s}
+  .chip:hover{color:#fff;border-color:var(--cyan);background:rgba(91,224,255,.08)}
+
+  .status{color:var(--soft);margin:24px 2px 12px;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;min-height:16px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px}
+  .clip{border-radius:18px;overflow:hidden;position:relative;border:1px solid var(--line);background:#11151d;
+    box-shadow:0 14px 34px rgba(0,0,0,.5);display:flex;flex-direction:column;cursor:pointer;animation:pop .45s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+  .clip:hover{border-color:rgba(255,255,255,.22);transform:translateY(-2px);transition:.15s}
+  .clip .thumb{position:relative;aspect-ratio:16/9;background:#11151d center/cover no-repeat;overflow:hidden}
+  .clip .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border:0;z-index:0}
+  .clip .thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,10,.35) 0%,rgba(4,6,10,0) 45%)}
+  .clip .ttag{position:absolute;top:9px;left:9px;z-index:1;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:var(--amber)}
+  .clip .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;z-index:1;
+    background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(0,0,0,.45)}
+  .clip .play:after{content:"";border-left:15px solid #0a0c11;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+  .meta{padding:12px 14px 14px}
+  .who{font-family:Fredoka;font-weight:600;font-size:16px;line-height:1.15}
+  .desc{color:var(--soft);font-size:12.5px;margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:11px;font-size:12px}
+  .scorepill{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:7px;padding:3px 9px;color:#fff;font-family:Fredoka;font-weight:600;font-variant-numeric:tabular-nums}
+  .sim{color:var(--cyan);font-weight:700;font-variant-numeric:tabular-nums}
+
+  .empty{color:var(--soft);text-align:center;padding:60px 20px;font-size:14px;grid-column:1/-1}
+  footer{margin-top:52px;color:rgba(255,255,255,.42);font-size:12.5px;line-height:1.6;border-top:1px solid var(--line);padding-top:18px}
+  footer b{color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <img class="ic" src="appicon.png" alt="Clippie"/>
+    <div class="nm">Clippie</div>
+    <div class="spacer"></div>
+    <div class="tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Court Search
+    </div>
+  </div>
+  <div class="sub">Ask for a play in plain English. <span class="qd">Qdrant</span> vector search over <b>1,750+ real game highlights</b> -- every result is an actual clip our CV pipeline cut from live youth basketball.</div>
+
+  <div class="search">
+    <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="q" placeholder='clutch three pointer in a close game' autofocus/>
+    <button onclick="go()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      Search
+    </button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="status" id="status"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>Built on the <b>Clippie</b> pipeline: a custom YOLO make-detection model cuts every clip from real game film, OpenAI embeds each play's context, and <b>Qdrant</b> serves the semantic search. Sports World Cup Hackathon 2026.</footer>
+</div>
+<script>
+const EXAMPLES = [
+  "clutch three pointer in a close game",
+  "steal that led to a bucket",
+  "free throws late in the game",
+  "buzzer beater to tie it up",
+  "big play in a blowout",
+];
+const chips = document.getElementById('chips');
+EXAMPLES.forEach(t => {
+  const c = document.createElement('div');
+  c.className = 'chip'; c.textContent = t;
+  c.onclick = () => { document.getElementById('q').value = t; go(); };
+  chips.appendChild(c);
+});
+const qEl = document.getElementById('q');
+qEl.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+const EVENT_TAG = {
+  '3PT Make':'3PT','3PT':'3PT','2PT Make':'2PT','2PT':'2PT','FT':'FT','1g':'FT','2g':'2PT','3g':'3PT',
+  'STL':'STEAL','BLK':'BLOCK','AST':'ASSIST','REB':'REBOUND','DUNK':'DUNK'
+};
+
+async function go() {
+  const q = qEl.value.trim();
+  if (!q) return;
+  const st = document.getElementById('status'), grid = document.getElementById('grid');
+  st.textContent = 'Searching...'; grid.innerHTML = '';
+  try {
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q));
+    const d = await r.json();
+    if (d.error) { st.textContent = 'Error: ' + d.error; return; }
+    if (!d.results.length) { st.textContent=''; grid.innerHTML = '<div class="empty">No clips found. Try another play.</div>'; return; }
+    st.textContent = d.results.length + ' clips · ranked by Qdrant similarity';
+    for (const c of d.results) {
+      const a = document.createElement('a');
+      a.className = 'clip'; a.href = c.video; a.target = '_blank'; a.rel = 'noopener';
+      const who = [c.player, c.number ? '#' + c.number : ''].filter(Boolean).join(' ') || c.team || 'Highlight';
+      const tag = EVENT_TAG[c.event] || (c.event || '').toUpperCase().slice(0,8);
+      a.innerHTML = `
+        <div class="thumb">${c.thumb ? `<img loading="lazy" src="${c.thumb}" alt=""/>` : ''}
+          ${tag ? `<div class="ttag"></div>` : ''}
+          <div class="play"></div>
+        </div>
+        <div class="meta">
+          <div class="who"></div>
+          <div class="desc"></div>
+          <div class="row"><span class="scorepill"></span><span class="sim"></span></div>
+        </div>`;
+      if (tag) a.querySelector('.ttag').textContent = tag;
+      a.querySelector('.who').textContent = who;
+      a.querySelector('.desc').textContent = c.matchup || c.text || '';
+      a.querySelector('.scorepill').textContent = c.score ? c.score : (c.team || '');
+      a.querySelector('.sim').textContent = c.sim;
+      grid.appendChild(a);
+    }
+  } catch (e) { st.textContent = 'Error: ' + e; }
+}
+</script>
+</body>
+</html>
