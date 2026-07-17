@@ -95,13 +95,21 @@ def main():
     key = openai_key()
     db = firestore.Client(project="scdemo-c11e0")
 
+    # Untyped / broken CV clips -- never index these (no real play type to search on).
+    BAD_EVENTS = {"", "Shot Made", "Shot Attempt", "Shot Miss", "2PT Miss", "3PT Miss"}
+
     clips = []
     for doc in db.collection("highlights").stream():
         d = doc.to_dict() or {}
         if not d.get("videoURL"):
             continue
-        # Rich docs first: named player or typed event makes a searchable clip
-        if not ((d.get("playerName") or "").strip() or (d.get("eventType") or "").strip()):
+        ev = (d.get("eventType") or "").strip()
+        team = (d.get("teamName") or "").strip()
+        player = (d.get("playerName") or "").strip()
+        # Only real highlights: a recognized play type AND some attribution (team or player).
+        if ev in BAD_EVENTS:
+            continue
+        if not (team or player):
             continue
         clips.append(
             {
